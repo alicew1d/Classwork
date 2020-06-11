@@ -1,0 +1,13 @@
+# more unique testing
+> init
+<<<
+> branch b1
+<<<
++ g.txt notwug.txt
+> add g.txt
+<<<
+> commit "g.txt added"
+<<<
+> checkout b1
+<<<
+* g.txt
