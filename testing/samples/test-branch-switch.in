@@ -1,0 +1,37 @@
+# Create two branches and switch between them
+> init
+<<<
+> branch branch1
+<<<
++ wug.txt wug.txt
++ notwug.txt notwug.txt
+> add notwug.txt
+<<<
+> add wug.txt
+<<<
+> commit "wug and not wug"
+<<<
+E wug.txt
+E notwug.txt
+> checkout branch1
+<<<
+* wug.txt
+* notwug.txt
++ f.txt notwug.txt
+> add f.txt
+<<<
+> commit "another f.txt in branch1"
+<<<
+= f.txt notwug.txt
+* wug.txt
+* notwug.txt
+> checkout master
+<<<
+= wug.txt wug.txt
+= notwug.txt notwug.txt
+* f.txt
+> checkout branch1
+<<<
+= f.txt notwug.txt
+* notwug.txt
+* wug.txt
