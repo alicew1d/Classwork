@@ -1,0 +1,166 @@
+Gitlet Design Document
+----------------------
+By: Alice Wang, axu
+
+Classes and Data Structures
+---------------------------
+
+**** Blob ****
+Implements Serializable.
+This class stores the file contents of the specific file that I want to commit.
+
+** Fields **
+Byte[] _filecontents: stores the file contents of the filepath you pass into your Blob.
+String _sha1: stores the sha1 value of your blob.
+
+**** CommitObject ****
+Implements Serializable.
+This class stores all the metadata and filename-to-blob pointers of my specific commit object.
+
+** Fields **
+String _msg: commit message
+Date _date: timestamp
+CommitObject _parent: your parent commit
+Treemap _blobfiles: Mapping of the file names to the Sha1 names of the blobs you are keeping track of.
+String _sha1: My sha1 value of my commit object.
+
+**** Gitlet ****
+Implements Serializable
+This class stores the mapping of my branch heads to my Commit Objects through a TreeMap. Also
+Stores information about my current branch head.
+
+** Fields **
+_branchHeadMap: TreeMap of “pointers” of master or branch name to the current head of branch commit.
+_curBranch:  Current Branch name.
+
+**** Stage ****
+Implements Serializable
+This class stores the files that are staged as either modified or new. Also stores files that have been deleted
+but we wil see if this is going to be used in the future.
+
+** Fields **
+List _newFiles: A String list of all the files that are new in my stage object.
+List _modifiedFiles: A string list of all the files that have been modified and staged.
+List _deletedFiles: A String list of all the files that have been deleted.
+
+******** Command Classes *********
+These are all the commands that you can type into the command line. I gave them separate classes for my
+own understanding and readability.
+
+They will all deserialize the gitlet object and stage object so we can access their information.
+
+**** Init ****
+The class for the command Init.
+
+** Fields **
+Gitlet _gitlet: Stores my new _gitlet instance.
+Stage _stage: Stores my stage object.
+Static Final String GITLET_DIR: Stores the Path name of my .gitlet directory
+Static Final String STAGE_DIR: Stores the Path name of my .staging directory
+Static Final String STAGE_OBJ_DIR: Stores the Path name of my stagingobject file
+Static Final String COMMIT_DIR: Stores the Path name of my .commit directory
+Static Final String BLOB_DIR: Stores the Path name of my .blob directory
+Static Final String GITLET_METADATA_NAME: Stores the Path name of the metadata of my gitlet file
+
+**** Add ****
+This is the class for the command Init. The constructor takes in the file name.
+
+** Fields **
+String _filename: String of the filename I want to add.
+Gitlet _gitlet: Gitlet object of the current state of my gitlet.
+Stage _stage: Stage object of the current state of my Stage.
+File _src: File of my working directory copy of the file.
+File _dest: File of the path I want to copy my file into. (basically want to copy the workdirectory file into my staging folder).
+
+**** Log ****
+This is the class for the command Log. Constructor takes in no arguments.
+
+** Fields **
+Gitlet _gitlet: The Gitlet object of the current state of my gitlet.
+
+
+**** Commit ****
+This is the class for the Commit command. Constructor takes in the commit message.
+
+** Fields **
+String _msg: String of my commit message.
+Gitlet _gitlet: Gitlet object of my current gitlet.
+Stage _stage: Stage object of my current stage.
+
+**** Checkout ****
+This is the class for the Checkout Command. Constructor takes in no arguments.
+
+** Fields **
+Gitlet _gitlet: Gitlet object of my current gitlet.
+Stage _stage: Stage object of my current stage.
+
+**** GlobalLog ***
+This is the class for the global log command. Constructor takes in no arguments.
+
+** Fields **
+No Fields.
+
+**** BranchCommand ****
+This is the class for the branch commands (including rm-branch and branch). Constructor takes in no arguments.
+
+** Fields **
+Gitlet _gitlet: Gitlet object of my current gitlet.
+
+Algorithms
+----------
+I believe the methods available in my Gitlet, CommandObject, Blob, and Init classes are clear and would be redundant to explain.
+
+**** Stage Class ****
+addFile(String filename, String filetype): Basically "stages" the file in my Stage class by marking it as New or Modified
+and adding it to the list of files in my Stage.
+
+**** Add Class ****
+addLogic(): Adds new files to the stage and copies over the stage. If the file exists in the staging directory, delete it
+and recopy. If the file already exists in my current commit, do not add the file. Removes it if it has already been staged.
+
+doAdd(): Calls on Add logic. Checks if file exists in my working directory. if it doesnt throw an error. After running
+addLogic, serializes the stage back into the stagingobject folder.
+
+**** CommitCommand Class ****
+doCommit(): Checks if my stage is empty. If empty, throw an error. Else, accesses my current CommitObject and copies
+its mapping of files to blobsha1's. then updates this by checking the files in my stage object. Creates
+a new commit object and adds it as my head, writing the commit object to disk. Finally, clears the stage and staging folder
+and reserializes both my gitlet and cleared stage.
+
+**** Log Class ****
+doLog(): iterates through my current branch through accessing the CommitObject's parent. Prints out the log for it each
+iteration through using the getLog function of my Commit Object.
+
+**** Checkout Class ****
+doCheckoutFile(String Filename): Pretty self explanatory, I would be re-iterating what the spec says.
+
+doCheckoutCommitFile(String commitID, String Filename): Finds the commit in my .gitlet/.commit/ directory. If it exists, proceed by accessing the file and
+writing the object back into the same file in my working directory.
+
+doCheckoutBranch(String branchName): Checks if the branch name exists and if it is my master branch. If neither, accesses the list of files
+in my working directory, the checkout-branch commit, and my current head's commit.
+1. write the checkout-branch files to my working directory if it exists in both my working and current commit.
+2. If it doesnt exist in my working and current commit, still do so, but it will be creating a new file instead.
+3. If it is in my working and the checkout-branch, but not my current commit, throw an error about the untracked file.
+4. If it is tracked in my current commit, but NOT in my checkout-branch, delete that file in my working directory.
+
+**** GlobalLog Class ****
+doGlobalLog(): gets the list of all the files in my .commit folder. Iterates through them and prints out each commit's log.
+
+**** BranchCommand Class ****
+doBranch(String bName): Creates a new pointer by adding a <branchName, CommitObject> Key-Value pair to my gitlet object.
+
+doRMBranch(String bName): Removes the entry of the key-value pair in my gitlet object, after checking that this branch is a valid
+branch name and not my current branch.
+
+Persistence
+-----------
+In order to save the snapshot of my gitlet and stage objects at all times:
+
+1. Init: serializes an initial gitlet object to the file called metadata as well as a blank Stage to file called stageobject in my directory.
+2. Add: serializes my modified Stage at the end of the call to the disk. Also copies the staged files to my .staging directory.
+3. Commit: serializes my modified _gitlet object to the file called metadata, the commit object itself to a file named
+    by its sha1 value in the .commit directory, and any blobs that are created to the .blob directory with a file name of the blob's sha1.
+4. Branch: serializes my modified gitlet object back into the file called metadata after removing or adding a branch.
+5. Checkout: in checkout branch, serializes the cleared stage back into the stagingobject file and also deletes any files in my
+    staging directory. Also reserializes the gitlet object with updated branch head back into my metadata file.
