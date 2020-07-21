@@ -1,0 +1,59 @@
+# Test the find command.
+> init
+<<<
++ f.txt wug.txt
++ g.txt wug.txt
+> add f.txt
+<<<
+> add g.txt
+<<<
+> commit "Two files"
+<<<
+> rm f.txt
+<<<
+> commit "Remove f"
+<<<
++ f.txt notwug.txt
+> add f.txt
+<<<
+> commit "Two files"
+<<<
+D UID "[a-f0-9]+"
+D HEADER "commit (${UID})"
+D DATE "Date: \w\w\w \w\w\w \d+ \d\d:\d\d:\d\d \d\d\d\d [-+]\d\d\d\d"
+> log
+===
+${HEADER}
+${DATE}
+Two files
+
+===
+${HEADER}
+${DATE}
+Remove f
+
+===
+${HEADER}
+${DATE}
+Two files
+
+===
+${HEADER}
+${DATE}
+initial commit
+
+<<<*
+# UID of init
+D UID1 "${4}"
+# UID of two files 1
+D UID2 "${3}"
+# UID of one file
+D UID3 "${2}"
+# UID of current
+D UID4 "${1}"
+> find "Two files"
+(${UID4}\n${UID2}|${UID2}\n${UID4})
+<<<*
+> find "initial commit"
+${UID1}
+<<<*

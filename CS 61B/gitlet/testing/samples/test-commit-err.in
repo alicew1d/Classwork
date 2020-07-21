@@ -1,0 +1,6 @@
+# Commit with nothing to staged or removed.
+> init
+<<<
+> commit "should be nothing to commit"
+No changes added to the commit.
+<<<

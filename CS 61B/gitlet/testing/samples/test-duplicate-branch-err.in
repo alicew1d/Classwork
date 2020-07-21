@@ -1,0 +1,15 @@
+# check if you can make another branch with the same name
+> init
+<<<
+> branch A
+<<<
++ f.txt wug.txt
+> add f.txt
+<<<
+> commit "f.txt"
+<<<
+> branch B
+<<<
+> branch A
+A branch with that name already exists.
+<<<

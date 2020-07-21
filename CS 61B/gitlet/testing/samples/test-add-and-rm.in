@@ -1,0 +1,8 @@
+# check rm works
+> init
+<<<
++ check.txt wug2.txt
++ foo.txt wug.txt
+> rm foo.txt
+No reason to remove the file.
+<<<
